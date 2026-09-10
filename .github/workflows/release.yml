@@ -26,7 +26,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: wheel
-          path: dist/ei_video-*
+          path: dist/ei_media-*
 
   exe:
     needs: guard
@@ -60,7 +60,33 @@ jobs:
           gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
             artifacts/wheel/* artifacts/ei-Linux/* \
             artifacts/ei-Windows/* artifacts/ei-macOS/*
-      # TODO(publish): upload to PyPI once the ei-video project exists.
-      # Preferred: OIDC trusted publishing (no stored token):
-      # - uses: astral-sh/setup-uv@v5
-      # - run: uv publish artifacts/wheel/ei_video-*
+
+  publish-testpypi:
+    needs: [wheel]
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          verbose: true
+
+  publish-pypi:
+    needs: [publish-testpypi]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

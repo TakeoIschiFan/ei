@@ -169,4 +169,4 @@ def test_touch_seg_missing_is_noop(tmp_path):
 def test_cache_root_default_unified_name():
     from ei.media.library import cache_root_default
 
-    assert cache_root_default().endswith("ei-video")
+    assert cache_root_default().endswith("ei-media")

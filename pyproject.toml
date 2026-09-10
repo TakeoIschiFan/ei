@@ -3,14 +3,34 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ei-video"
+name = "ei-media"
 version = "0.1.0"
-description = "Minimal media server with optional trancoding"
+description = "Minimal media server with optional transcoding"
 readme = "README.md"
 requires-python = ">= 3.11"
 license = { text = "GPL-3.0-only" }
 authors = [{ name = "takeoischifan", email = "takeoischifan@github.com" }]
+keywords = ["media-server", "video", "streaming", "lan", "dash"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Multimedia :: Video",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/TakeoIschiFan/ei"
+Repository = "https://github.com/TakeoIschiFan/ei"
+Issues = "https://github.com/TakeoIschiFan/ei/issues"
+Releases = "https://github.com/TakeoIschiFan/ei/releases"
 
 [project.scripts]
 ei = "ei.cli:main"

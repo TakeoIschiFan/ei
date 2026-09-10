@@ -155,7 +155,7 @@ def scan_library(
 def cache_root_default() -> str:
     if sys.platform == "win32":
         base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
-        return str(Path(base) / "ei-video")
+        return str(Path(base) / "ei-media")
     if sys.platform == "darwin":
-        return str(Path.home() / "Library" / "Caches" / "ei-video")
-    return str(Path.home() / ".cache" / "ei-video")
+        return str(Path.home() / "Library" / "Caches" / "ei-media")
+    return str(Path.home() / ".cache" / "ei-media")

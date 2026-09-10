@@ -9,11 +9,11 @@ Grab a standalone `ei` executable for your operating system from the [releases p
 Or install from PyPI if you have Python installed and prefer that:
 
 ```shell
-pip install ei-video
+pip install ei-media
 # or
-pipx install ei-video
+pipx install ei-media
 # or
-uv tool install ei-video
+uv tool install ei-media
 ```
 
 You also need [ffmpeg](https://ffmpeg.org/) available on your system.
@@ -40,9 +40,9 @@ ei [DIR] [options]
                          Default: top level only.
     --cache-dir DIR      Where probe metadata, segments, and
                          thumbnails are cached.
-                         Default: ~/.cache/ei-video on Linux,
-                         ~/Library/Caches/ei-video on macOS,
-                         %LOCALAPPDATA%/ei-video on Windows.
+                         Default: ~/.cache/ei-media on Linux,
+                         ~/Library/Caches/ei-media on macOS,
+                         %LOCALAPPDATA%/ei-media on Windows.
     --cache-size SIZE    max cache size for video segments
                          Accepts suffixes KB/MB/GB, 0 = unlimited.
                          Default: 5GB.
