@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ei-${{ runner.os }}
-          path: dist/ei/
+          path: dist/ei*
 
   publish:
     needs: [wheel, exe]
@@ -58,13 +58,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd artifacts
-          zip -qr ../ei-linux.zip ei-Linux
-          zip -qr ../ei-windows.zip ei-Windows
-          zip -qr ../ei-macos.zip ei-macOS
-          cd ..
+          mv artifacts/ei-Linux/ei "artifacts/ei-Linux/ei-$GITHUB_REF_NAME-linux"
+          mv artifacts/ei-macOS/ei "artifacts/ei-macOS/ei-$GITHUB_REF_NAME-macos"
+          mv artifacts/ei-Windows/ei.exe "artifacts/ei-Windows/ei-$GITHUB_REF_NAME-windows.exe"
           gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
-            artifacts/wheel/* ei-linux.zip ei-windows.zip ei-macos.zip
+            artifacts/wheel/* artifacts/ei-Linux/* \
+            artifacts/ei-Windows/* artifacts/ei-macOS/*
 
   publish-testpypi:
     needs: [wheel]

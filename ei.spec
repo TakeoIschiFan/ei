@@ -19,21 +19,13 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=None)  # noqa: F821
 exe = EXE(  # noqa: F821
     pyz,
     a.scripts,
-    [],
-    exclude_binaries=True,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
     name="ei",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
     console=True,
-)
-coll = COLLECT(  # noqa: F821
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=False,
-    name="ei",
 )
