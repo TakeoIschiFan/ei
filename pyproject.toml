@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ei-video"
+version = "0.1.0"
+description = "Minimal media server with optional trancoding"
+readme = "README.md"
+requires-python = ">= 3.11"
+license = { text = "GPL-3.0-only" }
+authors = [{ name = "takeoischifan", email = "takeoischifan@github.com" }]
+dependencies = []
+
+[project.scripts]
+ei = "ei.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ei"]
+
+[dependency-groups]
+dev = ["pyinstaller>=6.22.2", "pytest>=8", "ruff>=0.4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+# Vendored browser deps, grab using scripts/vendor_sync.py
+[tool.ei.vendor]
+media-chrome = "4.19.2"
+dash-video-element = "0.3.2"
+custom-media-element = "1.4.6"
+dashjs = "5.1.1"
+media-tracks = "0.3.5"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# integration helpers use a compact lambda for repeated polling.
+"tests/test_integration.py" = ["E731"]
+
+[tool.ruff.format]
+quote-style = "double"

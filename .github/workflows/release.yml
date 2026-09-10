@@ -1,0 +1,66 @@
+name: release
+
+# Trigger: bash scripts/release.sh X.Y.Z (bumps pyproject, tags vX.Y.Z, pushes).
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: tag matches pyproject version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          ver=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+          [[ "$tag" == "$ver" ]] || { echo "tag v$tag != pyproject $ver"; exit 1; }
+
+  wheel:
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/ei_video-*
+
+  exe:
+    needs: guard
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --group dev
+      - run: uv run pyinstaller --clean --noconfirm ei.spec
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ei-${{ runner.os }}
+          path: dist/ei/
+
+  publish:
+    needs: [wheel, exe]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: create GitHub Release with wheel + executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
+            artifacts/wheel/* artifacts/ei-Linux/* \
+            artifacts/ei-Windows/* artifacts/ei-macOS/*
+      # TODO(publish): upload to PyPI once the ei-video project exists.
+      # Preferred: OIDC trusted publishing (no stored token):
+      # - uses: astral-sh/setup-uv@v5
+      # - run: uv publish artifacts/wheel/ei_video-*

@@ -1,0 +1,16 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# Rust target dir (legacy entry, kept)
+target/
+# build outputs (wheel/sdist + PyInstaller)
+dist/
+build/
+# local media / caches (large, machine-specific; never commit)
+vids/

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content='width=device-width,initial-scale=1'>
+<link rel=icon href='data:,'>
+<title>ei login</title>
+<style>{{CSS}}</style>
+</head>
+<body>
+<main style='max-width:320px;margin:4rem auto'>
+<h2 style='text-align:center'>ei</h2>
+<div id=box class='{{LOGIN_SHAKE}}'>
+<div class=pin-dots id=dots aria-live=polite>○○○○</div>
+<div class=keypad>
+<button type=button data-d='1'>1</button><button type=button data-d='2'>2</button><button type=button data-d='3'>3</button>
+<button type=button data-d='4'>4</button><button type=button data-d='5'>5</button><button type=button data-d='6'>6</button>
+<button type=button data-d='7'>7</button><button type=button data-d='8'>8</button><button type=button data-d='9'>9</button>
+<span></span><button type=button data-d='0'>0</button><button type=button id=back aria-label='Delete digit'>⌫</button>
+</div>
+{{LOGIN_ERROR}}</div>
+<form id=f method=post action='/login'><input type=hidden name=pin id=pin></form>
+<script>{{JS_LOGIN}}</script>
+</main>
+</body>
+</html>

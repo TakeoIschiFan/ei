@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content='width=device-width,initial-scale=1'>
+<link rel=icon href='data:,'>
+<title>{{TITLE}}</title>
+<style>{{CSS}}</style>
+<script type='module'>import '/vendor/media-chrome.js';</script>
+<script type='module'>import '/vendor/media-chrome-menu.js';</script>
+<script type='module'>import '/vendor/dash-video-element.js';</script>
+</head>
+<body>
+<main>
+<h2>{{TITLE}}</h2>
+<div class=player>
+<media-controller>
+<dash-video id=dv slot=media data-aid='{{AID}}' data-vcodec='{{VCODEC}}' data-transcode='{{TRANSCODE}}' src='/mpd/{{AID}}.mpd' playsinline crossorigin preload=metadata autoplay></dash-video>
+<media-rendition-menu hidden anchor=auto></media-rendition-menu>
+<media-audio-track-menu hidden anchor=auto></media-audio-track-menu>
+<media-captions-menu hidden anchor=auto></media-captions-menu>
+<media-control-bar>
+<media-play-button></media-play-button>
+<media-seek-backward-button seekoffset=10></media-seek-backward-button>
+<media-seek-forward-button seekoffset=10></media-seek-forward-button>
+<media-mute-button></media-mute-button><media-volume-range></media-volume-range>
+<media-time-range></media-time-range><media-time-display showduration></media-time-display>
+<media-rendition-menu-button></media-rendition-menu-button>
+<media-audio-track-menu-button></media-audio-track-menu-button>
+<media-captions-menu-button></media-captions-menu-button>
+<media-pip-button></media-pip-button><media-fullscreen-button></media-fullscreen-button>
+</media-control-bar>
+</media-controller>
+<div id=playerErr class=overlay hidden><div class=ov-box><p id=ovMsg></p><p id=ovHint></p></div></div>
+</div>
+<pre id=err></pre>
+<script>{{JS_WATCH}}</script>
+</main>
+</body>
+</html>
