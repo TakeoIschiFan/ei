@@ -58,9 +58,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cd artifacts
+          zip -qr ../ei-linux.zip ei-Linux
+          zip -qr ../ei-windows.zip ei-Windows
+          zip -qr ../ei-macos.zip ei-macOS
+          cd ..
           gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
-            artifacts/wheel/* artifacts/ei-Linux/* \
-            artifacts/ei-Windows/* artifacts/ei-macOS/*
+            artifacts/wheel/* ei-linux.zip ei-windows.zip ei-macos.zip
 
   publish-testpypi:
     needs: [wheel]
