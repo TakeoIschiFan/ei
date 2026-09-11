@@ -200,7 +200,13 @@ class Handler(BaseHTTPRequestHandler):
         ensure_rep_metadata(asset)
         self._html(
             200,
-            page_watch(aid, rel, asset.info.video.codec, ctx.transcode, ",".join(a.codec for a in asset.info.audios)),
+            page_watch(
+                aid,
+                rel,
+                asset.info.video.codec,
+                ctx.transcode,
+                ",".join(a.codec for a in asset.info.audios),
+            ),
         )
 
     def get_mpd(self, ctx: WebContext, path: str, qs) -> None:

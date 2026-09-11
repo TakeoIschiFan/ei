@@ -5,7 +5,7 @@ import pytest
 
 import ei.media.state as st
 from ei.media.ids import asset_id, is_valid_id
-from ei.media.library import scan_library
+from ei.media.library import VIDEO_EXTS, scan_library
 from ei.media.registry import Registry
 from ei.web.assets import transcode_reps, valid_reps
 from ei.web.auth import cookie_token
@@ -80,6 +80,30 @@ def test_scan_flat_by_default(tmp_path):
     assert "a.mp4" in [v[1] for v in flat.values()]
     assert not any(v[1].startswith("sub") for v in flat.values())
     assert os.path.join("sub", "c.mp4") in [v[1] for v in rec.values()]
+
+
+def test_scan_skips_nonmedia_extensions(tmp_path):
+    (tmp_path / "a.mkv").touch()
+    for name in ["b.pyc", "c.js", "d.txt", "e.zip"]:
+        (tmp_path / name).touch()
+    seen = []
+
+    def is_video(p):
+        seen.append(os.path.basename(p))
+        return True
+
+    assert len(scan_library(str(tmp_path), is_video=is_video)) == 1
+    assert seen == ["a.mkv"]
+
+
+def test_scan_extra_exts_opt_in(tmp_path):
+    (tmp_path / "a.roq").touch()
+    assert ".roq" not in VIDEO_EXTS
+    assert scan_library(str(tmp_path), is_video=lambda p: True) == {}
+    res = scan_library(
+        str(tmp_path), exts=set(VIDEO_EXTS) | {".roq"}, is_video=lambda p: True
+    )
+    assert len(res) == 1
 
 
 def test_scan_probe_filters(tmp_path):

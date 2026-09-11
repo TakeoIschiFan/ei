@@ -45,11 +45,13 @@ class Registry:
         recursive: bool = False,
         is_video: Callable[[str], bool] | None = has_video_stream,
         max_cache_bytes: int = cache_mod.DEFAULT_CACHE_SIZE,
+        exts: set[str] | None = None,
     ):
         self.media_dir = os.path.abspath(media_dir)
         self.cache_dir = cache_dir
         self.recursive = recursive
         self.is_video = is_video
+        self.exts = exts
         self.max_cache_bytes = max_cache_bytes
         self.lock = threading.Lock()
         self.assets: dict[str, Asset] = {}
@@ -78,7 +80,10 @@ class Registry:
 
     def rescan(self):
         m = scan_library(
-            self.media_dir, is_video=self.is_video, recursive=self.recursive
+            self.media_dir,
+            exts=self.exts,
+            is_video=self.is_video,
+            recursive=self.recursive,
         )
         with self.lock:
             self.paths = m

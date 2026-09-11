@@ -38,6 +38,12 @@ ei [DIR] [options]
                          Default: current directory.
     --recursive          Also descend into subdirectories.
                          Default: top level only.
+    --extra-extensions EXTS
+                         Extra container extensions to scan,
+                         comma-separated (e.g. --extra-extensions
+                         .nut,.mxf).
+                         The built-in list already covers common
+                         containers (mkv, mp4, webm, ts, avi, ...).
     --cache-dir DIR      Where probe metadata, segments, and
                          thumbnails are cached.
                          Default: ~/.cache/ei-media on Linux,

@@ -11,7 +11,7 @@ import ei.media.state as _state
 from ei.media import cache as _cache
 from ei.media import ffmpeg as _ffmpeg
 from ei.media.encoder import resolve_video_encoder
-from ei.media.library import cache_root_default
+from ei.media.library import VIDEO_EXTS, cache_root_default
 from ei.media.readahead import Readahead
 from ei.media.registry import Registry
 from ei.web.http import Handler
@@ -42,6 +42,13 @@ def parse_args(argv: list[str] | None = None):
         help="descend into subdirectories (default: top level only)",
     )
     ap.add_argument(
+        "--extra-extensions",
+        default="",
+        help="extra container extensions to scan, comma-separated "
+        "(e.g. --extra-extensions .nut,.mxf). The built-in list already "
+        "covers common containers (mkv, mp4, webm, ts, avi, ...).",
+    )
+    ap.add_argument(
         "--transcode",
         action="store_true",
         help="enable the transcode stack: transcode ladder + AAC fallback "
@@ -67,6 +74,12 @@ def parse_args(argv: list[str] | None = None):
     except ValueError as e:
         ap.error(str(e))
     a.max_cache_bytes = max_cache_bytes
+    extra = {
+        p if p.startswith(".") else "." + p
+        for p in (s.strip().lower() for s in a.extra_extensions.split(","))
+        if p
+    }
+    a.exts = VIDEO_EXTS | extra
     return a
 
 
@@ -85,6 +98,7 @@ def main(argv: list[str] | None = None) -> None:
         args.cache_dir,
         recursive=args.recursive,
         max_cache_bytes=args.max_cache_bytes,
+        exts=args.exts,
     )
     _state.bind(
         reg,
