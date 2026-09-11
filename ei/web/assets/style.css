@@ -55,7 +55,9 @@ media-controller{width:100%;display:block;background:#000;border:1px solid var(-
 #ovHint{color:var(--muted);font-size:.9rem}
 /* ---- watch player chrome (media-chrome) ---- */
 /* Volume: collapsed until hover/focus (YouTube-style). No collapse
-   primitive in the library, so this lives in page CSS. */
+   primitive in the library, so this lives in page CSS. Hover expansion
+   is gated on hover-capable input so a sticky tap-:hover on touch does
+   not glue the slider open in fullscreen; touch stays mute-only. */
 media-volume-range{
   width:0;
   opacity:0;
@@ -63,19 +65,21 @@ media-volume-range{
   --media-control-padding:10px 0;
   transition:width .2s ease,opacity .2s ease;
 }
-media-mute-button:hover+media-volume-range,
+@media (hover:hover){
+  media-mute-button:hover+media-volume-range,
+  media-volume-range:hover{
+    width:80px;
+    opacity:1;
+    --media-control-padding:10px 5px;
+  }
+}
 media-mute-button:focus-visible+media-volume-range,
-media-volume-range:hover,
 media-volume-range:focus-within{
   width:80px;
   opacity:1;
   --media-control-padding:10px 5px;
 }
 media-volume-range[mediavolumeunavailable]{display:none}
-/* Touch: no hover to expand, so keep a small always-visible slider. */
-@media (hover:none){
-  media-volume-range{width:60px;opacity:1;--media-control-padding:10px 5px}
-}
 /* Tight portrait: minimal bar. media-controller sets
    breakpointsm/md/lg/xl attrs from its own width (sm:384 md:576).
    Below md hide seek + quality/audio/captions menus + pip; below sm
