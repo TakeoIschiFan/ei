@@ -13,9 +13,10 @@
 <body>
 <main>
 <h2>{{TITLE}}</h2>
+<div id=trackWarn class=banner hidden><span id=trackWarnMsg></span><button id=trackWarnX aria-label='Dismiss'>×</button></div>
 <div class=player>
 <media-controller>
-<dash-video id=dv slot=media data-aid='{{AID}}' data-vcodec='{{VCODEC}}' data-transcode='{{TRANSCODE}}' src='/mpd/{{AID}}.mpd' playsinline crossorigin preload=metadata autoplay></dash-video>
+<dash-video id=dv slot=media data-aid='{{AID}}' data-vcodec='{{VCODEC}}' data-acodec='{{ACODEC}}' data-transcode='{{TRANSCODE}}' src='/mpd/{{AID}}.mpd' playsinline crossorigin preload=metadata autoplay></dash-video>
 <media-rendition-menu hidden anchor=auto></media-rendition-menu>
 <media-audio-track-menu hidden anchor=auto></media-audio-track-menu>
 <media-captions-menu hidden anchor=auto></media-captions-menu>

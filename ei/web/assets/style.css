@@ -53,11 +53,16 @@ media-controller{width:100%;display:block;background:#000;border:1px solid var(-
 .ov-box p{margin:.3rem 0}
 #ovMsg{font-size:1.05rem}
 #ovHint{color:var(--muted);font-size:.9rem}
+/* Codec warning banner above the player, closed with its button. */
+.banner{display:flex;gap:.75rem;align-items:center;justify-content:space-between;background:#1a1206;border:1px solid #6b4e12;color:#f5d98b;padding:.6rem .8rem;margin:.75rem 0;font-size:.9rem}
+.banner[hidden]{display:none}
+.banner button{background:none;border:1px solid #6b4e12;color:#f5d98b;padding:.1rem .55rem;font-size:1rem;line-height:1.2}
+.banner button:hover{background:#6b4e12;color:#000}
 /* ---- watch player chrome (media-chrome) ---- */
-/* Volume: collapsed until hover/focus (YouTube-style). No collapse
-   primitive in the library, so this lives in page CSS. Hover expansion
-   is gated on hover-capable input so a sticky tap-:hover on touch does
-   not glue the slider open in fullscreen; touch stays mute-only. */
+/* Volume slider, collapsed until hover or keyboard focus (YouTube-style).
+   media-chrome offers no collapsing slider, so this is page CSS.
+   The hover rule is limited to hover-capable pointers: touch input leaves
+   :hover stuck after a tap, which held the slider open in fullscreen. */
 media-volume-range{
   width:0;
   opacity:0;

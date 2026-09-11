@@ -113,14 +113,15 @@ def page_browse() -> str:
     return render("browse.html")
 
 
-def page_watch(aid: str, title: str, vcodec: str = "", transcode: bool = False) -> str:
-    # vcodec/transcode are stamped onto the element so watch.js can
-    # pre-flight MSE codec support without waiting on /api/video.
+def page_watch(aid: str, title: str, vcodec: str = "", transcode: bool = False, acodec: str = "") -> str:
+    # Passed to the page so watch.js can check MSE codec support
+    # without waiting on /api/video.
     # Escape here — render() trusts its inputs.
     return render(
         "watch.html",
         AID=html.escape(aid, quote=True),
         VCODEC=html.escape(vcodec, quote=True),
+        ACODEC=html.escape(acodec, quote=True),
         TRANSCODE="1" if transcode else "0",
         TITLE=html.escape(title),
     )

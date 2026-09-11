@@ -128,6 +128,8 @@ WATCH_MUST = (
     "showPlayerErr",
     "<media-time-range></media-time-range>",
     "media-volume-range[mediavolumeunavailable]",
+    "data-acodec=",
+    "id=trackWarn",
     "media-controller:not([breakpointmd])",
     "media-controller:not([breakpointsm])",
 )

@@ -16,6 +16,18 @@ function showErr(m) {
 // available rendition gets a message instead of a black screen.
 const NICE_CODEC = { h264: 'H.264 (AVC)', hevc: 'H.265 (HEVC)', av1: 'AV1', vp9: 'VP9' };
 const CODEC_STRINGS = { h264: 'avc1.640028', hevc: 'hvc1.1.6.L120.90', av1: 'av01.0.08M.08', vp9: 'vp09.00.10.08' };
+// Audio codec strings, same mapping as probe.AUDIO_CODEC_STRINGS.
+// Codecs not listed there are used unchanged.
+const NICE_ACODEC = { aac: 'AAC', eac3: 'Dolby Digital Plus (E-AC-3)', ac3: 'Dolby Digital (AC-3)', mp3: 'MP3', opus: 'Opus', flac: 'FLAC', vorbis: 'Vorbis', dts: 'DTS', truehd: 'Dolby TrueHD' };
+const ACODEC_STRINGS = { aac: 'mp4a.40.2', eac3: 'ec-3', ac3: 'ac-3', mp3: 'mp4a.6B' };
+const acodecStr = (c) => ACODEC_STRINGS[c] || c;
+function mseSupportsAudio(cs) {
+  try {
+    return !!cs && hasMSE && MediaSource.isTypeSupported('audio/mp4; codecs="' + cs + '"');
+  } catch {
+    return false;
+  }
+}
 const transcode = el.dataset.transcode === '1';
 const vcodec = el.dataset.vcodec || '';
 const vcodecStr = CODEC_STRINGS[vcodec] || vcodec;
@@ -43,18 +55,40 @@ if (!hasMSE) {
     'This browser has no Media Source Extensions support, so DASH playback is impossible.',
     'Try a browser with MSE support (e.g. desktop Chrome or Firefox).'
   );
-} else if (!mseSupports(vcodecStr)) {
-  const name = NICE_CODEC[vcodec] || vcodec;
-  if (!transcode) {
-    showPlayerErr(
-      'Your browser can\u2019t decode ' + name + ', and no transcode fallback is enabled.',
-      'Restart ei with --transcode to transcode to H.264 on the fly.'
-    );
-  } else if (!mseSupports(CODEC_STRINGS.h264)) {
-    showPlayerErr(
-      'This browser can\u2019t decode ' + name + ' or the H.264 transcode ladder.',
-      ''
-    );
+} else {
+  // Warn about codecs this browser cannot decode. Playback continues with
+  // the other track unaffected. Tracks covered by a transcode fallback
+  // (H.264 video, AAC audio) are not listed. Representation choice stays
+  // with dash.js.
+  const warnBox = document.getElementById('trackWarn');
+  const warnMsg = document.getElementById('trackWarnMsg');
+  const warnX = document.getElementById('trackWarnX');
+  if (warnX && warnBox) warnX.addEventListener('click', () => { warnBox.hidden = true; });
+  const vBad = !!vcodecStr && !mseSupports(vcodecStr);
+  const aBad = [...new Set(
+    (el.dataset.acodec || '').split(',').map((s) => s.trim()).filter(Boolean)
+      .filter((c) => !mseSupportsAudio(acodecStr(c)))
+  )];
+  const vCovered = transcode && mseSupports(CODEC_STRINGS.h264);
+  const aCovered = transcode && mseSupportsAudio(ACODEC_STRINGS.aac);
+  const vShow = vBad && !vCovered;
+  const aShow = aBad.length > 0 && !aCovered;
+  if ((vShow || aShow) && warnBox && warnMsg) {
+    const vName = NICE_CODEC[vcodec] || vcodec;
+    const aNames = aBad.map((c) => NICE_ACODEC[c] || c).join(', ');
+    let msg;
+    if (vShow && aShow) {
+      msg = 'This browser can\u2019t decode ' + vName + ' video or ' + aNames + ' audio. ';
+    } else if (vShow) {
+      msg = 'This browser can\u2019t decode ' + vName + ' video; audio will still play. ';
+    } else {
+      msg = 'This browser can\u2019t decode ' + aNames + ' audio; video will play silent. ';
+    }
+    msg += transcode
+      ? 'The fallback also looks unsupported here.'
+      : 'Restart ei with --transcode for compatible H.264 video / AAC audio.';
+    warnMsg.textContent = msg;
+    warnBox.hidden = false;
   }
 }
 // Key namespace for this asset's localStorage entries ('pos', 'q', 'a').
@@ -120,8 +154,14 @@ function renditions() {
 function applyQuality() {
   const r = renditions();
   if (!r) return;
-  // Default to the stream-copy variant: ABR can otherwise prefer a higher-bitrate transcode.
-  const want = LS.get('q', 'direct');
+  // Default to the stream-copy variant: ABR compares bitrates, and a transcode
+  // rung can have a higher bitrate than a lean direct encode at the same height.
+  // Fall back to automatic selection only when this browser cannot decode
+  // direct but can play the H.264 ladder.
+  let want = LS.get('q', 'direct');
+  if (want === 'direct' && transcode && vcodecStr && !mseSupports(vcodecStr) && mseSupports(CODEC_STRINGS.h264)) {
+    want = 'auto';
+  }
   let idx = -1;
   if (want !== 'auto') for (let i = 0; i < r.length; i++) if (String(r[i].id) === want) { idx = i; break; }
   if (r.selectedIndex !== idx) r.selectedIndex = idx;
