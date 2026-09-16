@@ -279,6 +279,40 @@ whenDefined('media-rendition-menu', () => {
     return cmp(a, b);
   };
 });
+// Caption selection: media-chrome's captions menu only flips the native
+// TextTrack.mode, but dash.js ignores native mode changes and keeps serving
+// the track it last selected through its own API, so every track except the
+// default never loads (pick another language -> blank). Mirror the native
+// selection into dash.js, the same way audio tracks are bridged above.
+// Upstream: TextTrackList.onchange is not honored
+// (github.com/Dash-Industry-Forum/dash.js/issues/3519) and
+// mode='showing' does nothing until setTextTrack() is called
+// (github.com/Dash-Industry-Forum/dash.js/issues/3657).
+until(() => el.api).then((a) => {
+  if (!a || !el.textTracks) return;
+  let syncing = false;
+  el.textTracks.addEventListener('change', () => {
+    if (syncing) return;
+    const sel = [...el.textTracks].find((t) => t.mode === 'showing');
+    const tracks = a.getTracksFor('text') || [];
+    let idx = -1;
+    if (sel) {
+      // dash.js ids are the MPD AdaptationSet ids, mirrored as the native
+      // track label; fall back to list order (live tracks have no id).
+      if (sel.label != null) {
+        idx = tracks.findIndex((t) => t.id != null && String(t.id) === String(sel.label));
+      }
+      if (idx < 0) idx = [...el.textTracks].indexOf(sel);
+    }
+    syncing = true;
+    try {
+      a.setTextTrack(sel ? idx : -1);
+    } catch (e) {
+      showErr('captions: ' + e);
+    }
+    setTimeout(() => { syncing = false; }, 0);
+  });
+});
 // Captions: dash.js labels sidecars by AdaptationSet id (bare numbers),
 // ignoring the MPD label attr; map ids to /api/video friendly labels.
 // Sidecar id for text j is len(audios) + j + 1, matching the MPD layout.

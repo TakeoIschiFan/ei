@@ -143,6 +143,8 @@ WATCH_MUST = (
     "removeAudioTrack",
     "getTracksFor",
     "setCurrentTrack",
+    "setTextTrack",
+    "Dash-Industry-Forum/dash.js/issues/3519",
     "LS.set('pos'",
     "/api/quality?asset=",
     "videoRenditions",
