@@ -250,6 +250,58 @@ until(() => el.api).then(async (a) => {
     feedAudio(a);
   }
 });
+// Double-tap to seek: media-chrome has no touch double-tap gesture.
+// Upstream request: muxinc/media-chrome/discussions/1259.
+const SEEK_TAP_SECONDS = 10;
+const TAP_DOUBLE_MS = 300;
+const TAP_SLOP_PX = 12;
+const gestureEl = el.closest('media-controller') || el;
+gestureEl.style.touchAction = 'manipulation'; // stop double-tap from zooming
+function onChrome(e) {
+  return (e.composedPath ? e.composedPath() : []).some((n) => {
+    const ln = n && n.localName;
+    return ln === 'media-control-bar' || ln === 'media-time-range'
+      || (ln && ln.startsWith('media-') && ln.endsWith('-button'));
+  });
+}
+function inVideoArea(e) {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && e.clientX >= r.left && e.clientX <= r.right
+    && e.clientY >= r.top && e.clientY <= r.bottom;
+}
+let tapType, tapDown = null, lastTapAt = 0, lastTapX = 0;
+gestureEl.addEventListener('pointerdown', (e) => {
+  tapType = e.pointerType;
+  tapDown = e.pointerType === 'touch' && inVideoArea(e) && !onChrome(e)
+    ? { x: e.clientX, y: e.clientY }
+    : null;
+});
+gestureEl.addEventListener('click', (e) => {
+  const type = tapType;
+  tapType = undefined;
+  const down = tapDown;
+  tapDown = null;
+  if (type !== 'touch' || !down || !inVideoArea(e) || onChrome(e)) return;
+  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > TAP_SLOP_PX) {
+    lastTapAt = 0;
+    return;
+  }
+  const now = Date.now();
+  if (lastTapAt && now - lastTapAt < TAP_DOUBLE_MS && Math.abs(e.clientX - lastTapX) < 60) {
+    lastTapAt = 0;
+    seekByTap(e.clientX);
+  } else {
+    lastTapAt = now;
+    lastTapX = e.clientX;
+  }
+});
+function seekByTap(clientX) {
+  const r = el.getBoundingClientRect();
+  const dir = clientX < r.left + r.width / 2 ? -1 : 1;
+  let target = Math.max(0, (el.currentTime || 0) + dir * SEEK_TAP_SECONDS);
+  if (Number.isFinite(el.duration)) target = Math.min(target, el.duration);
+  el.currentTime = target;
+}
 // media-chrome renders "{height}p ({bitrate})" per rep, hiding the
 // stream-copy variant among transcodes: label it Direct, pin it first.
 // Static hooks on the menu class, patched once defined (module scripts

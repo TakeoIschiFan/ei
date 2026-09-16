@@ -145,6 +145,8 @@ WATCH_MUST = (
     "setCurrentTrack",
     "setTextTrack",
     "Dash-Industry-Forum/dash.js/issues/3519",
+    "seekByTap",
+    "muxinc/media-chrome/discussions/1259",
     "LS.set('pos'",
     "/api/quality?asset=",
     "videoRenditions",
