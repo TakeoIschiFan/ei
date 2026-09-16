@@ -10,6 +10,7 @@ from collections.abc import Callable
 from ei.media import cache as cache_mod
 from ei.media import meta as meta_mod
 from ei.media import probe as probe_mod
+from ei.media import sidecar as sidecar_mod
 from ei.media.ids import is_valid_id
 from ei.media.library import has_video_stream, scan_library
 from ei.media.models import AssetInfo
@@ -122,6 +123,13 @@ class Registry:
             info = self._reprobe(aid, abs_path)
             if info is None:
                 return None
+        # Sidecar discovery is process-scoped: re-run it on every load (the
+        # asset is cached afterwards) and drop stale conversions so a restart
+        # always reflects the current set of files and their contents.
+        info.texts = [t for t in info.texts if not t.sidecar] + sidecar_mod.discover(
+            abs_path
+        )
+        sidecar_mod.reset_cache(self.cache_dir, info.name)
         asset = Asset(info)
         with self.lock:
             self.assets[aid] = asset

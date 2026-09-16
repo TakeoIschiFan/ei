@@ -25,6 +25,14 @@ def audio_staging_dir(pass_dir: str) -> str:
     return pass_dir + ".staging"
 
 
+def sidecar_dir(cache_dir: str, name: str) -> str:
+    return os.path.join(cache_dir, name, "sidecar")
+
+
+def sidecar_target(cache_dir: str, name: str, index: int) -> str:
+    return os.path.join(sidecar_dir(cache_dir, name), f"text{index}.vtt")
+
+
 def thumbs_dir(cache_dir: str) -> str:
     return os.path.join(cache_dir, "thumbs")
 

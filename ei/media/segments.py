@@ -14,7 +14,13 @@ from ei.media import generation
 from ei.media import meta as meta_mod
 from ei.media import probe as probe_mod
 from ei.media.models import audio_fallback_needed
-from ei.media.paths import audio_target, parse_seg_number, seg_filename, video_target
+from ei.media.paths import (
+    audio_target,
+    parse_seg_number,
+    seg_filename,
+    sidecar_target,
+    video_target,
+)
 
 log = logging.getLogger(__name__)
 
@@ -146,7 +152,15 @@ def _resolve_text(asset: Asset, rel: str) -> SegmentJob | None:
     j = int(m["track"])
     if j >= len(info.texts):
         return None
-    dest = os.path.join(_state.cache_dir(), info.name, rel)
+    tr = info.texts[j]
+    if tr.sidecar:
+        # The source may have vanished since load (removal is only noticed at
+        # restart); 404 it rather than failing generation.
+        if not os.path.isfile(tr.sidecar):
+            return None
+        dest = sidecar_target(_state.cache_dir(), info.name, j)
+    else:
+        dest = os.path.join(_state.cache_dir(), info.name, rel)
     return SegmentJob(dest, lambda: generation.gen_vtt(info, j, dest))
 
 

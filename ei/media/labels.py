@@ -219,14 +219,18 @@ def audio_labels(langs: list[str]) -> list[str]:
     return _dedupe([language_name(c) or "Original" for c in langs])
 
 
-def text_label(lang: str, forced: bool = False, sdh: bool = False) -> str:
+def text_label(
+    lang: str, forced: bool = False, sdh: bool = False, external: bool = False
+) -> str:
     base = language_name(lang) or "Original"
     if forced:
         base += " (Forced)"
     if sdh:
         base += " (SDH)"
+    if external:
+        base += " (External)"
     return base
 
 
-def text_labels(tracks: list[tuple[str, bool, bool]]) -> list[str]:
-    return _dedupe([text_label(lang, f, s) for lang, f, s in tracks])
+def text_labels(tracks: list[tuple]) -> list[str]:
+    return _dedupe([text_label(*t) for t in tracks])

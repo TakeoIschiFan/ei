@@ -196,10 +196,20 @@ def gen_init(
 
 def gen_vtt(info: AssetInfo, track: int, dest_path: str) -> None:
     tr = info.texts[track]
+    if tr.sidecar:
+        # A sidecar always carries a single subtitle stream; SRT is converted
+        # with ffmpeg, WebVTT is copied byte-for-byte.
+        src, ordinal = tr.sidecar, 0
+        copy = os.path.splitext(src)[1].lower() == ".vtt"
+    else:
+        src, ordinal, copy = info.path, tr.ordinal, False
     tmpdir = os.path.join(os.path.dirname(dest_path), ".tmp")
     os.makedirs(tmpdir, exist_ok=True)
     tmp = os.path.join(tmpdir, f"text{track}.vtt.tmp")
-    _run(_recipes.vtt_cmd(info.path, tr.ordinal, tmp))
+    if copy:
+        shutil.copyfile(src, tmp)
+    else:
+        _run(_recipes.vtt_cmd(src, ordinal, tmp))
     os.replace(tmp, dest_path)
 
 

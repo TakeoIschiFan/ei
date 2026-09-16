@@ -160,10 +160,13 @@ def video_detail(asset: Asset, rel: str) -> VideoDetail:
                 "title": t.title,
                 "forced": t.forced,
                 "sdh": t.sdh,
+                "external": bool(t.sidecar),
             }
             for t, lab in zip(
                 info.texts,
-                text_labels([(t.lang, t.forced, t.sdh) for t in info.texts]),
+                text_labels(
+                    [(t.lang, t.forced, t.sdh, bool(t.sidecar)) for t in info.texts]
+                ),
                 strict=True,
             )
         ],

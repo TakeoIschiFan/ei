@@ -58,6 +58,9 @@ class TextTrack:
     title: str
     forced: bool = False
     sdh: bool = False
+    #: Absolute path of the same-directory .srt/.vtt this track comes from;
+    #: empty for a subtitle stream embedded in the video container.
+    sidecar: str = ""
 
 
 @dataclass

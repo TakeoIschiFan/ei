@@ -38,7 +38,11 @@ def save_info(cache_dir: str, info: AssetInfo) -> None:
 
 
 def to_dict(i: AssetInfo) -> dict:
-    return {"v": META_VERSION, **asdict(i)}
+    raw = {"v": META_VERSION, **asdict(i)}
+    # Sidecars are re-discovered from disk on every process load; only the
+    # embedded tracks are part of the probed container and worth persisting.
+    raw["texts"] = [t for t in raw["texts"] if not t.get("sidecar")]
+    return raw
 
 
 def from_dict(raw: dict) -> AssetInfo:

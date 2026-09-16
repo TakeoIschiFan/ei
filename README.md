@@ -72,6 +72,26 @@ ei [DIR] [options]
                          of CPU. Make sure your ffmpeg and
                          graphics stack supports it.
 
+### Subtitles
+
+External subtitle files sitting next to a video are detected automatically
+(always on, no flag). A sidecar must live in the same directory as the video,
+match its basename, and use `.srt` or `.vtt`:
+
+    Movie.mkv  ->  Movie.srt, Movie.en.srt, Movie.en.forced.vtt
+
+Subdirectories are never searched. After the basename, every dot/underscore/
+dash separated token must be a known ISO 639 language code or one of `forced`,
+`sdh`, or `cc` (treated as SDH); unknown tokens such as `1080p` mean the file
+is skipped, and at most one language tag is accepted. Without a language tag
+the track is labelled "Original". Sidecars are listed alongside embedded
+subtitle streams in the player's captions menu with an "(External)" suffix.
+`.srt` files are converted to WebVTT with ffmpeg on first use; `.vtt` files are
+served byte-for-byte.
+
+Discovery is cached for the lifetime of the process: adding, removing, editing
+or renaming a sidecar only takes effect after restarting `ei`.
+
 ## Contributing
 
 Issues and PRs welcome.

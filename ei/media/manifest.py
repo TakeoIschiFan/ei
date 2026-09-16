@@ -100,7 +100,9 @@ def _audio_set(info: AssetInfo, j: int, label: str, transcode: bool) -> str:
 
 
 def _text_sets(info: AssetInfo) -> list[str]:
-    labels = text_labels([(t.lang, t.forced, t.sdh) for t in info.texts])
+    labels = text_labels(
+        [(t.lang, t.forced, t.sdh, bool(t.sidecar)) for t in info.texts]
+    )
     return [
         f'  <AdaptationSet id="{len(info.audios) + j + 1}" contentType="text" '
         f'mimeType="text/vtt" lang="{escape(t.lang or "und")}" '
