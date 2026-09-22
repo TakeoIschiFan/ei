@@ -2,6 +2,8 @@
 
 Minimal media server with optional transcoding. Hassle-free streaming of media files to all devices on your network.
 
+![The three ei screens — PIN login, media library, and video player — shown as a landscape triptych split by diagonal cuts](docs/screenshot.png)
+
 ## Features
 
 - Batteries included web-based video player.
