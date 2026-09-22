@@ -42,6 +42,11 @@ All configuration is via CLI flags (`ei --help`):
 ei [DIR] [options]
 ```
 
+### General Options:
+
+    -d, --debug          Print debug output.
+    -v, --version        Print the version and exit.
+
 ### Filesystem Options:
 
     DIR                  Media directory to serve.

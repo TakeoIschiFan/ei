@@ -98,8 +98,7 @@ def test_segment_cmd_skips_redundant_trim_at_zero():
 
 
 def test_segment_cmd_no_preseek_for_stream_copy():
-    # Stream copy + -copyts + mpegts input seek intermittently yields empty
-    # dash output, so copy paths use output-only seeking.
+    # Output-only seeking (preseek=False): a single -ss at the trim.
     cmd = rc.segment_cmd(
         "a.ts",
         TrimWindow(93.477333, 97.467333),
@@ -128,3 +127,17 @@ def test_audio_pass_cmd(idx, mode, codec, present, absent):
 @pytest.mark.parametrize(("argv", "want"), [([], False), (["--nvenc"], True)])
 def test_nvenc_cli_flag(argv, want):
     assert parse_args(argv).nvenc is want
+
+
+@pytest.mark.parametrize("flag", ["-d", "--debug"])
+def test_debug_cli_flag(flag):
+    assert parse_args([flag]).debug is True
+    assert parse_args([]).debug is False
+
+
+@pytest.mark.parametrize("flag", ["-v", "--version"])
+def test_version_cli_flag(flag, capsys):
+    with pytest.raises(SystemExit) as exc:
+        parse_args([flag])
+    assert exc.value.code == 0
+    assert "ei " in capsys.readouterr().out

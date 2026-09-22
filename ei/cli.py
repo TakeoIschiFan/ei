@@ -1,6 +1,7 @@
 """CLI / startup: argparse, registry wiring, ThreadingHTTPServer."""
 
 import argparse
+import logging
 import os
 import re
 import secrets
@@ -19,6 +20,18 @@ from ei.web.session import SessionStore
 
 DEFAULT_PORT = 8509
 DEFAULT_HOST = "0.0.0.0"
+
+
+def _version() -> str:
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+
+        try:
+            return version("ei-media")
+        except PackageNotFoundError:
+            return "unknown"
+    except Exception:  # noqa: BLE001 - version lookup must never break startup
+        return "unknown"
 
 
 def parse_args(argv: list[str] | None = None):
@@ -60,6 +73,18 @@ def parse_args(argv: list[str] | None = None):
         help="encode the transcode ladder with NVIDIA NVENC (h264_nvenc) instead "
         "of libx264. Fails fast at startup when no working NVENC is found.",
     )
+    ap.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="log every request and segment generation to stderr",
+    )
+    ap.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"ei {_version()}",
+    )
     a = ap.parse_args(argv)
     if not os.path.isdir(a.dir):
         ap.error(f"media dir not found: {a.dir}")
@@ -85,6 +110,11 @@ def parse_args(argv: list[str] | None = None):
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
+    if args.debug:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        )
     _ffmpeg.check_tools()
     video_encoder = resolve_video_encoder(args.nvenc)
     if args.no_pin:

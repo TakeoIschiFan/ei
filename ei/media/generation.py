@@ -146,9 +146,7 @@ def gen_video_segment(
     else:
         tail = _recipes.video_copy_tail(info.video.codec)
     _generate(
-        GenRequest(
-            info, target_dir, tail, i, TrimWindow(trim, to_time), preseek=transcoded
-        )
+        GenRequest(info, target_dir, tail, i, TrimWindow(trim, to_time), preseek=True)
     )
 
 

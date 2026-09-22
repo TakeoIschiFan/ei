@@ -123,10 +123,6 @@ def segment_cmd(
     trim, to_time = window.trim, window.to_time
     cmd = [FFMPEG, *ffmpeg_input_flags(src), "-v", "error", "-y"]
     if preseek:
-        # Fast pre-seek: input seek is only safe when re-encoding.
-        # With stream copy + -copyts on mpegts, an input seek close to the
-        # output trim intermittently yields empty dash output (no packets),
-        # so copy paths must pass preseek=False and rely on output seeking.
         cmd += [
             "-ss",
             _s(trim - PRE_SEEK_OFFSET if trim and trim > PRE_SEEK_OFFSET else 0.0),
