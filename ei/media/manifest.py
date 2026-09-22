@@ -50,7 +50,8 @@ def _video_rep(info: AssetInfo, rep_id: str, bandwidth: int, transcoded: bool) -
             f'codecs="{escape(info.video.codec_str)}"'
         )
     fr = f' frameRate="{info.video.frame_rate}"' if info.video.frame_rate else ""
-    pto = max(0, round((info.boundaries[0] + info.dts_shift) * ts))
+    origin = info.boundaries[0] if transcoded else info.video_pts_start
+    pto = max(0, round((origin + info.dts_shift) * ts))
     return (
         f'    <Representation id="{escape(rep_id)}" mimeType="video/mp4" '
         f'bandwidth="{bandwidth}" {attrs}{fr}>\n'

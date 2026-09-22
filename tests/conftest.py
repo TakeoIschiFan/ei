@@ -25,6 +25,7 @@ def make_info(
     duration: float = 12.0,
     boundaries: list[float] | None = None,
     kf_dts: list[float] | None = None,
+    video_pts_start: float | None = None,
     texts: list[models_mod.TextTrack] | None = None,
     transcode_ladder: list[tuple[int, int]] | None = None,
 ) -> models_mod.AssetInfo:
@@ -63,6 +64,7 @@ def make_info(
         audios=[audio],
         boundaries=boundaries if boundaries is not None else [0.0, 4.0, 8.0],
         kf_dts=kf_dts if kf_dts is not None else [0.0, 4.0, 8.0],
+        video_pts_start=video_pts_start if video_pts_start is not None else 0.0,
         transcode_ladder=transcode_ladder
         if transcode_ladder is not None
         else [(480, 1_000_000), (360, 700_000)],

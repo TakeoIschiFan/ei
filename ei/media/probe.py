@@ -64,7 +64,7 @@ def _float(value, default: float | None = None) -> float | None:
         return default
 
 
-Packet = tuple[float | None, float | None, bool]  # (pts, dts, keyframe)
+Packet = tuple[float, float, bool]  # (pts, dts, keyframe); pts is always known
 
 
 def _video_timeline(
@@ -72,9 +72,9 @@ def _video_timeline(
 ) -> tuple[list[float], list[float]]:
     kpts, kdts = [], []
     for pts, dts, kf in pkts.get(index, []):
-        if kf and pts is not None and pts >= vstart - KEYFRAME_EARLY_TOL_SEC:
+        if kf and pts >= vstart - KEYFRAME_EARLY_TOL_SEC:
             kpts.append(pts)
-            kdts.append(dts if dts is not None else pts)
+            kdts.append(dts)
     boundaries, kf_dts = [], []
     for pts, dts in zip(kpts, kdts, strict=False):
         if boundaries and pts - boundaries[-1] < KEYFRAME_DEDUPE_SEC:  # dedupe
@@ -115,7 +115,7 @@ def _audio_tracks(
     for a in asrcs:
         astart = _float(a.get("start_time"), 0.0) or 0.0
         aend = astart + (_float(a.get("duration")) or max(0.0, fmt_dur - astart))
-        apts = sorted(p for p, _, _ in pkts.get(a["index"], []) if p is not None)
+        apts = sorted(p for p, _, _ in pkts.get(a["index"], []))
         if not apts:
             continue
         landings = _audio_landings(apts, aend)
@@ -225,6 +225,11 @@ def build_info(name: str, path: str) -> AssetInfo:
     vstart = _float(vsrc.get("start_time"), 0.0) or 0.0
     vend = vstart + (_float(vsrc.get("duration")) or max(0.0, fmt_dur - vstart))
     boundaries, kf_dts = _video_timeline(pkts, vsrc["index"], vstart, vend)
+    # Earliest presentation timestamp; open-GOP leading pictures can precede
+    # the first keyframe, and it's the direct rep's presentation origin.
+    video_pts_start = min(
+        (p for p, _, _ in pkts.get(vsrc["index"], [])), default=vstart
+    )
 
     video = _video_track(vsrc, vstart, vend)
 
@@ -250,6 +255,7 @@ def build_info(name: str, path: str) -> AssetInfo:
         audios=audios,
         boundaries=boundaries,
         kf_dts=kf_dts,
+        video_pts_start=video_pts_start,
         transcode_ladder=[(h, bw) for h, bw in TRANSCODE_LADDER if h <= video.height],
         dts_shift=max(0.0, -min(first_stamps)),
         texts=texts,
@@ -273,8 +279,10 @@ def _packet_index(path: str, wanted: set[int]) -> dict[int, list[Packet]]:
         if idx not in out:
             continue
         pts = _float(parts[1])
+        if pts is None:
+            continue  # no usable presentation time
         dts = _float(parts[2])
-        out[idx].append((pts, dts, parts[3].startswith("K")))
+        out[idx].append((pts, pts if dts is None else dts, parts[3].startswith("K")))
     return out
 
 

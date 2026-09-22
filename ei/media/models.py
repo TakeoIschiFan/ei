@@ -74,6 +74,8 @@ class AssetInfo:
     audios: list[AudioTrack] = field(default_factory=list)
     boundaries: list[float] = field(default_factory=list)
     kf_dts: list[float] = field(default_factory=list)
+    #: Earliest presentation timestamp of the video track. (some direct-play sources can have B-frame starts)
+    video_pts_start: float = 0.0
     transcode_ladder: list[tuple[int, int]] = field(default_factory=list)
     dts_shift: float = 0.0
     rep_ts: dict[str, int] = field(default_factory=dict)

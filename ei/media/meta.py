@@ -9,7 +9,7 @@ from dataclasses import asdict
 from ei.media.models import AssetInfo, AudioTrack, TextTrack, VideoTrack
 from ei.media.paths import meta_path
 
-META_VERSION = 9
+META_VERSION = 11
 
 
 def load_info(cache_dir: str, name: str, path: str) -> AssetInfo | None:
@@ -56,6 +56,7 @@ def from_dict(raw: dict) -> AssetInfo:
         audios=[AudioTrack(**a) for a in raw["audios"]],
         boundaries=list(raw.get("boundaries", [])),
         kf_dts=list(raw.get("kf_dts", [])),
+        video_pts_start=raw.get("video_pts_start", 0.0),
         transcode_ladder=[(h, bw) for h, bw in raw.get("transcode_ladder", [])],
         rep_ts=dict(raw.get("rep_ts", {})),
         dts_shift=raw.get("dts_shift", 0.0),

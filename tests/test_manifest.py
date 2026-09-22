@@ -101,3 +101,22 @@ def test_build_mpd_transcode_off_direct_only(info):
     assert mpd.count('mimeType="video/mp4" bandwidth') == 1
     assert "audio0/direct/init.mp4" in mpd
     assert 'id="direct"' in mpd and "aac192" not in mpd
+
+
+def test_build_mpd_direct_pto_uses_first_presentation_time(info):
+    # Open-GOP: the first leading picture presents before the keyframe, so the
+    # direct PTO must use video_pts_start, not boundaries[0].
+    info.boundaries = [1.0, 5.0, 9.0]
+    info.kf_dts = [0.9, 4.9, 8.9]
+    info.video_pts_start = 0.7
+    mpd = manifest.build_mpd(info, only="direct")
+    assert 'presentationTimeOffset="63000"' in mpd
+
+
+def test_build_mpd_transcode_pto_uses_keyframe_pts(info):
+    info.boundaries = [1.0, 5.0, 9.0]
+    info.kf_dts = [0.9, 4.9, 8.9]
+    info.video_pts_start = 0.7
+    mpd = manifest.build_mpd(info, only="480p")
+    assert 'presentationTimeOffset="90000"' in mpd
+    assert '<S t="90000"' in mpd
